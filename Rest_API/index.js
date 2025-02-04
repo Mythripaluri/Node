@@ -1,13 +1,13 @@
 const express = require("express");
 const fs = require("fs");
-const users = require("./MOCK_DATA.json");
+let users = require("./MOCK_DATA.json"); // Use let instead of const to allow modification
 
 const app = express();
 const PORT = 8000;
 
-// Middleware to parse URL-encoded request bodies
+// Middleware to parse URL-encoded and JSON request bodies
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json()); // Added JSON parsing middleware for handling JSON requests
+app.use(express.json());
 
 // 🟢 GET all users (HTML Response)
 app.get("/users", (req, res) => {
@@ -23,13 +23,13 @@ app.get("/api/users", (req, res) => {
     return res.json(users);
 });
 
-// 🟢 GET user by ID, PATCH, and DELETE
+// 🟢 GET user by ID, PATCH (Update), and DELETE
 app
     .route("/api/users/:id")
     .get((req, res) => {
         const id = Number(req.params.id);
-        const user = users.find((u) => u.id === id); // FIXED: Used 'user' instead of 'users'
-        
+        const user = users.find((u) => u.id === id);
+
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
@@ -80,7 +80,7 @@ app.post("/api/users", (req, res) => {
     const newUser = { ...body, id: users.length + 1 };
     users.push(newUser);
 
-    // FIXED: Correct usage of fs.writeFileSync
+    // Save new user to file
     fs.writeFileSync("./MOCK_DATA.json", JSON.stringify(users, null, 2));
 
     return res.json({ status: "success", id: newUser.id });
